@@ -35,16 +35,19 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    """Return all pictures"""
+    return jsonify(data), 200
 
 ######################################################################
 # GET A PICTURE
 ######################################################################
-
-
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
+    """Retrieve a picture by its ID"""
+    picture = next((item for item in data if item["id"] == id), None)
+    if picture:
+        return jsonify(picture), 200
+    return {"message": "Picture not found"}, 404
 
 
 ######################################################################
@@ -52,20 +55,35 @@ def get_picture_by_id(id):
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    """Create a new picture"""
+    new_picture = request.get_json()
+    if any(item["id"] == new_picture["id"] for item in data):
+        return {"Message": f"picture with id {new_picture['id']} already present"}, 302
+    data.append(new_picture)
+    return jsonify(new_picture), 201
 
 ######################################################################
 # UPDATE A PICTURE
 ######################################################################
-
-
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    """Update an existing picture"""
+    updated_picture = request.get_json()
+    picture = next((item for item in data if item["id"] == id), None)
+    if not picture:
+        return {"message": "picture not found"}, 404
+    picture.update(updated_picture)
+    return jsonify(picture), 200
 
 ######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    """Delete a picture by its ID"""
+    global data
+    picture = next((item for item in data if item["id"] == id), None)
+    if not picture:
+        return {"message": "picture not found"}, 404
+    data = [item for item in data if item["id"] != id]
+    return '', 204
